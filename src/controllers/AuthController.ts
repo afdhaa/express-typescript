@@ -20,7 +20,12 @@ class AuthController {
 		//Validate if the parameters are ok
 		const errors = await validate(user);
 		if (errors.length > 0) {
-			res.status(400).json(errors);
+			const result = {
+				error: true,
+				message: errors,
+				data: [],
+			};
+			res.status(400).json(result);
 			return;
 		}
 
@@ -57,7 +62,12 @@ class AuthController {
 		//Check if email and password are set
 		let {email, password} = req.body;
 		if (!(email && password)) {
-			res.status(400).json("bad request");
+			const result = {
+				error: true,
+				message: "Parameter Missing",
+				data: [],
+			};
+			res.status(400).json(result);
 		}
 
 		let user: User;
@@ -65,12 +75,22 @@ class AuthController {
 			// Get user from database
 			user = await User.findOneOrFail({where: {email}});
 		} catch (error) {
-			res.status(401).json("unauthorized");
+			const result = {
+				error: true,
+				message: "Email Not Found",
+				data: [],
+			};
+			res.status(400).json(result);
 		}
 
 		//Check if encrypted password match
 		if (!user.checkIfUnencryptedPasswordIsValid(password)) {
-			res.status(401).json("unauthorized");
+			const result = {
+				error: true,
+				message: "Password Incorrect",
+				data: [],
+			};
+			res.status(400).json(result);
 			return;
 		}
 
@@ -80,45 +100,15 @@ class AuthController {
 		});
 
 		//Send the jwt in the response
-		res.send(token);
-	};
-
-	static changePassword = async (req: Request, res: Response) => {
-		//Get ID from JWT
-		const id = res.locals.jwtPayload.userId;
-
-		//Get parameters from the body
-		const {oldPassword, newPassword} = req.body;
-		if (!(oldPassword && newPassword)) {
-			res.status(400).json("bad request");
-		}
-
-		let user: User;
-		try {
-			// Get user from the database
-			user = await User.findOneOrFail(id);
-		} catch (id) {
-			res.status(401).json("unauthorized");
-		}
-
-		//Check if old password matchs
-		if (!user.checkIfUnencryptedPasswordIsValid(oldPassword)) {
-			res.status(401).json("unauthorized");
-			return;
-		}
-
-		//Validate de model (password lenght)
-		user.password = newPassword;
-		const errors = await validate(user);
-		if (errors.length > 0) {
-			res.status(400).json(errors);
-			return;
-		}
-		//Hash the new password and save
-		user.hashPassword();
-		User.save(user);
-
-		res.status(201).json("user created");
+		const result = {
+			error: false,
+			message: "Login Success",
+			data: {
+				token: token,
+				user: user,
+			},
+		};
+		res.status(200).json(result);
 	};
 }
 

@@ -14,7 +14,7 @@ class UserController {
 
 		const result = {
 			error: false,
-			message: "List User",
+			message: "List All User",
 			data: users,
 		};
 		//Send the users object
@@ -48,7 +48,12 @@ class UserController {
 			};
 			res.status(200).json(result);
 		} catch (error) {
-			res.status(404).json("User not found");
+			const result = {
+				error: false,
+				message: "User not found",
+				data: [],
+			};
+			res.status(404).json(result);
 		}
 	};
 
@@ -74,7 +79,12 @@ class UserController {
 		try {
 			await User.save(user);
 		} catch (e) {
-			res.status(409).json("email already in use");
+			const result = {
+				error: true,
+				message: "Email already in use",
+				data: [],
+			};
+			res.status(400).json(result);
 			return;
 		}
 		const result = {
@@ -83,60 +93,6 @@ class UserController {
 			data: user,
 		};
 		res.status(200).json(result);
-	};
-
-	static editUser = async (req: Request, res: Response) => {
-		//Get the ID from the url
-		const id = req.params.id;
-
-		//Get values from the body
-		const {username, role} = req.body;
-
-		let user;
-		//Try to find user on database
-		try {
-			user = await User.findOneOrFail(id);
-		} catch (error) {
-			//If not found, send a 404 response
-			res.status(404).json("User not found");
-			return;
-		}
-
-		//Validate the new values on model
-		user.username = username;
-		user.role = role;
-		const errors = await validate(user);
-		if (errors.length > 0) {
-			res.status(400).json(errors);
-			return;
-		}
-
-		//Try to safe, if fails, that means username already in use
-		try {
-			await User.save(user);
-		} catch (e) {
-			res.status(409).json("username already in use");
-			return;
-		}
-		//After all send a 204 (no content, but accepted) response
-		res.status(204).json("User updated");
-	};
-
-	static deleteUser = async (req: Request, res: Response) => {
-		//Get the ID from the url
-		const id = req.params.id;
-
-		let user: User;
-		try {
-			user = await User.findOneOrFail(id);
-		} catch (error) {
-			res.status(404).json("User not found");
-			return;
-		}
-		User.delete(id);
-
-		//After all send a 204 (no content, but accepted) response
-		res.status(204).json("User deleted");
 	};
 }
 
