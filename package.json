@@ -24,6 +24,7 @@
       "start": "ts-node src/index.ts",
       "tsc": "tsc",
       "serve": "set debug=* && ts-node-dev --respawn --transpile-only ./src/index.ts",
-      "build": "tsc && node ./build/index.js"
+      "build": "set debug=* && ts-node-dev --respawn --transpile-only ./src/index.ts",
+      "build_bc": "tsc && node ./build/index.js"
    }
 }
