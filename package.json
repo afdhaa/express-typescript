@@ -24,12 +24,12 @@
       "typeorm": "0.2.29"
    },
    "scripts": {
-      "start": "ts-node src/index.ts",
+      "start": "node ./build/index.js",
       "tsc": "tsc",
       "serve": "set debug=* && ts-node-dev --respawn --transpile-only ./src/index.ts",
-      "build": "tsc && node ./build/index.js",
+      "build": "tsc",
       "build_bc": "tsc && node ./build/index.js",
-      "postinstall": "npx tsc",
+      "postinstall": "tsc",
       "dev": "tsc-watch --onSuccess \"node ./build/index.js\""
    }
 }
